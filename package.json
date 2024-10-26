@@ -1,0 +1,82 @@
+{
+  "name": "@saiuttej/nestjs-sqs-queue",
+  "version": "0.0.1",
+  "description": "A NestJS module to work with AWS SQS queues",
+  "author": "B Sai Uttej",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/saiuttej-b/nestjs-sqs-queue"
+  },
+  "bugs": {
+    "url": "https://github.com/saiuttej-b/nestjs-sqs-queue/issues"
+  },
+  "keywords": [
+    "nestjs",
+    "sqs",
+    "messages",
+    "events",
+    "queues"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc",
+    "prepublish": "npm run build",
+    "start": "ts-node src/index.ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "local": "pnpm i && pnpm build && pnpm pack"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.670.0",
+    "@golevelup/nestjs-discovery": "^4.0.1",
+    "sqs-consumer": "^11.2.0",
+    "sqs-producer": "^6.0.1"
+  },
+  "devDependencies": {
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/testing": "^10.0.0",
+    "@types/jest": "^29.5.2",
+    "@types/node": "^20.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "jest": "^29.5.0",
+    "prettier": "^3.3.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
+    "rootDir": "src",
+    "testRegex": ".*\\.spec\\.ts$",
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
+    "testEnvironment": "node",
+    "coveragePathIgnorePatterns": [
+      ".module.ts"
+    ]
+  }
+}

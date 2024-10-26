@@ -1,0 +1,2 @@
+export const QUEUE_EXECUTION_METHOD = Symbol.for('QUEUE_EXECUTION_METHOD');
+export const QUEUE_MODULE_OPTIONS = Symbol.for('QUEUE_MODULE_OPTIONS');

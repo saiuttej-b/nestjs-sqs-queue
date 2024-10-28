@@ -157,8 +157,8 @@ import { OnQueueMessage } from '@saiuttej/nestjs-sqs-queue';
 @Injectable()
 export class AppService {
   @OnQueueMessage({ key: 'my-sqs-queue', batch: true })
-  async queueHandler(messages: Message[]) {
-    console.log(messages);
+  async queueHandler(message: unknown | unknown[] | Message | Message[]) {
+    console.log(message);
   }
 }
 ```
@@ -168,6 +168,10 @@ OnQueueMessage decorator is used to listen to messages from the queue.
 
 - `key`\* - Unique key for the queue
 - `batch` - Boolean value to indicate whether to process messages in batch or not (default: false)
+
+By default the handler function, which is annotated with the `OnQueueMessage` decorator, it will receive the SQS message object(s) to the function. But you can also customize the SQS message object(s) by using `messageFormatter` in `consumerOptions`, when configuring the queue.
+
+But you need to remember that if the response return by the handler function is not `void` or `Promise<void>`, then the response should be an Object having the parameter `MessageId`, if it is batch operation then the response should be an Array of Objects, each Object having the parameter `MessageId`. This is required to delete the message from the queue after processing.
 
 Note:
 Only one handler can be registered for a queue key.

@@ -1,6 +1,7 @@
 import { CreateQueueCommand, Message, SQSClient } from '@aws-sdk/client-sqs';
 import { DiscoveryService } from '@golevelup/nestjs-discovery';
 import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { Consumer } from 'sqs-consumer';
 import { Producer } from 'sqs-producer';
 import { QUEUE_EXECUTION_METHOD, QUEUE_MODULE_OPTIONS } from '../constants/message-queue.constants';
@@ -147,15 +148,22 @@ export class SQSQueueHandler implements OnModuleInit, OnModuleDestroy {
         }
 
         const handlerFn = async (message: Message | Message[]) => {
+          const formattedMessage = consumerOptions?.messageFormatter
+            ? await consumerOptions.messageFormatter(message)
+            : message;
+
+          let result: Message | Message[] | void = undefined;
           const fn = async () => {
-            return handler.fn(message);
+            result = await handler.fn(formattedMessage);
           };
 
           if (!consumerOptions?.processMessageWrapperCallback) {
-            return fn();
+            await fn();
+            return result;
           }
 
-          return consumerOptions.processMessageWrapperCallback(message, fn);
+          await consumerOptions.processMessageWrapperCallback(message, fn);
+          return result;
         };
 
         const consumer = Consumer.create({
@@ -189,6 +197,29 @@ export class SQSQueueHandler implements OnModuleInit, OnModuleDestroy {
       throw new Error(`Queue "${key}" is not configured to send messages`);
     }
 
-    return queue.producer.send(message);
+    const producerOptions = queue.options.producerOptions;
+    const formattedMessage = producerOptions?.messageFormatter
+      ? await producerOptions.messageFormatter(message)
+      : message;
+
+    return queue.producer.send(this.formatMessage(formattedMessage));
+  }
+
+  private formatMessage(message: string | PMessage | (string | PMessage)[]): PMessage | PMessage[] {
+    if (typeof message === 'string') {
+      return { body: message, id: randomUUID() };
+    }
+
+    if (Array.isArray(message)) {
+      return message.map((m) => {
+        if (typeof m === 'string') {
+          return { body: m, id: randomUUID() };
+        }
+
+        return m;
+      });
+    }
+
+    return message;
   }
 }

@@ -20,7 +20,7 @@ export type PMessage = ProducerMessage;
 export type ProcessMessageWrapperFn = (
   messages: Message | Message[],
   exec: () => Promise<Message | Message[] | void>,
-) => Promise<Message | Message[] | void>;
+) => void | Promise<void>;
 
 type SQSConsumerConfig = Omit<
   ConsumerOptions,
@@ -38,6 +38,11 @@ type CustomConsumerConfig = {
    * @returns {Promise<Message | Message[] | void>} The result of the message handler
    */
   processMessageWrapperCallback?: ProcessMessageWrapperFn;
+
+  /**
+   * It a function which is used to format or convert the sqs message into the desired format.
+   */
+  messageFormatter?: (message: Message | Message[]) => unknown | Promise<unknown>;
 };
 
 /**
@@ -47,6 +52,19 @@ type SQSProducerConfig = Omit<
   ProducerOptions,
   'queueUrl' | 'sqs' | 'region' | 'useQueueUrlAsEndpoint'
 >;
+
+type CustomProducerConfig = {
+  /**
+   * It a function which is used to format or convert the message into the desired format.
+   */
+  messageFormatter?: (
+    message: string | PMessage | (string | PMessage)[],
+  ) =>
+    | string
+    | PMessage
+    | (string | PMessage)[]
+    | Promise<string | PMessage | (string | PMessage)[]>;
+};
 
 export type QueueOptions = {
   key: string;
@@ -60,7 +78,7 @@ export type QueueOptions = {
   autoCreateQueue?: boolean;
   executionTypes?: QueueExecutionType[];
   consumerOptions?: SQSConsumerConfig & CustomConsumerConfig;
-  producerOptions?: SQSProducerConfig;
+  producerOptions?: SQSProducerConfig & CustomProducerConfig;
 };
 
 export type SQSModuleOptions = {
